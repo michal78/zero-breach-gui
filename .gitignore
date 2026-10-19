@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+.tools/
+.vs/
+ZeroBreach-data/
+**/ZeroBreach-data/
+*.user
+*.suo
