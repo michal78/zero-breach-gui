@@ -1,0 +1,40 @@
+<Window x:Class="ZeroBreach.App.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Zero Breach" Width="900" Height="760" MinWidth="760" MinHeight="650" WindowStartupLocation="CenterScreen" Background="#F3F5F9" FontFamily="Segoe UI" FontSize="14" Closing="OnClosing">
+ <Grid>
+  <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="28">
+   <DockPanel Margin="0,0,0,22">
+    <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="24,0,0,0"><Hyperlink NavigateUri="https://github.com/interplains/zero-breach/tree/main/scan" RequestNavigate="Source_RequestNavigate" Foreground="#2564DF" ToolTip="https://github.com/interplains/zero-breach/tree/main/scan">Python source on GitHub ↗</Hyperlink></TextBlock>
+    <TextBlock Text="Zero Breach" FontSize="26" FontWeight="SemiBold"/>
+   </DockPanel>
+   <Border Background="White" CornerRadius="12" Padding="22" BorderBrush="#E1E6EF" BorderThickness="1">
+    <StackPanel>
+     <TextBlock Text="Choose your scan" FontSize="17" FontWeight="SemiBold"/>
+     <Grid Margin="0,16,0,15"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+      <StackPanel Margin="0,0,16,0"><RadioButton x:Name="Standard" GroupName="ScanMode" IsChecked="True" Content="Standard scan" FontWeight="SemiBold"/><TextBlock Text="Browser traces, file fingerprints and Windows records." FontSize="12" Foreground="#6A7890" Margin="21,6,0,0"/></StackPanel>
+      <StackPanel Grid.Column="1"><RadioButton x:Name="Quick" GroupName="ScanMode" Content="Quick scan" FontWeight="SemiBold"/><TextBlock Text="Skips file fingerprints for a faster, less complete check." FontSize="12" Foreground="#6A7890" Margin="21,6,0,0"/></StackPanel>
+     </Grid>
+     <TextBlock Text="Before you start: close your browsers for better coverage. You can keep them open, but some records may be unavailable." FontSize="12" Foreground="#60718A" Margin="0,0,0,17"/>
+     <WrapPanel><Button x:Name="StartButton" Content="Start scan" Click="Start_Click" Background="#2564DF" Foreground="White" FontWeight="SemiBold" MinWidth="150"/><Button x:Name="CancelButton" Content="Cancel" Click="Cancel_Click" Visibility="Collapsed"/><Button x:Name="SavedButton" Content="Scan with saved version" Click="Saved_Click" Visibility="Collapsed"/></WrapPanel>
+     <ProgressBar x:Name="Progress" Height="4" Margin="0,18,0,0" IsIndeterminate="True" Visibility="Collapsed" Foreground="#2564DF"/>
+     <TextBlock x:Name="StatusText" Text="Ready. The latest official scanner will be verified before it runs." Margin="0,14,0,0" FontSize="12" Foreground="#52647F"/>
+     <TextBlock x:Name="ElapsedText" Foreground="#73829A" FontSize="11" Margin="0,5,0,0"/>
+    </StackPanel>
+   </Border>
+   <Border x:Name="ErrorPanel" Visibility="Collapsed" Background="#FFF1E5" BorderBrush="#F2C79B" BorderThickness="1" CornerRadius="9" Padding="18" Margin="0,18,0,0"><TextBox x:Name="ErrorText" Style="{StaticResource Selectable}" Foreground="#83451A"/></Border>
+   <Border x:Name="ResultPanel" Visibility="Collapsed" Background="White" CornerRadius="12" Padding="22" Margin="0,20,0,0" BorderBrush="#E1E6EF" BorderThickness="1"><StackPanel>
+    <TextBlock x:Name="ResultEyebrow" FontSize="11" Foreground="#61748C" FontWeight="SemiBold"/>
+    <TextBlock x:Name="ResultTitle" FontSize="24" FontWeight="SemiBold" Margin="0,9,0,10"/>
+    <TextBlock x:Name="ResultSummary" Foreground="#52647F" Margin="0,0,0,18"/>
+    <TabControl Background="White" BorderBrush="#E0E6EF" Padding="14">
+     <TabItem x:Name="FindingsTab" Header="Findings"><ScrollViewer MaxHeight="390" VerticalScrollBarVisibility="Auto"><StackPanel><TextBlock x:Name="EmptyFindings" Text="No known indicator matched in the records that could be checked." Margin="0,5,0,10"/><ItemsControl x:Name="FindingsList"><ItemsControl.ItemTemplate><DataTemplate><Border BorderBrush="#DDE5EF" BorderThickness="0,0,0,1" Padding="0,12"><StackPanel><TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,9"/><TextBox Text="{Binding Text, Mode=OneWay}" Style="{StaticResource Selectable}"/></StackPanel></Border></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel></ScrollViewer></TabItem>
+     <TabItem Header="Coverage &amp; gaps"><ScrollViewer MaxHeight="390" VerticalScrollBarVisibility="Auto"><StackPanel><TextBlock Text="WHAT COULD NOT BE CHECKED" FontWeight="Bold" FontSize="12" Foreground="#98591B" Margin="0,6,0,10"/><TextBox x:Name="GapsText" Style="{StaticResource Selectable}"/><TextBlock Text="WHAT WAS CHECKED" FontWeight="Bold" FontSize="12" Margin="0,22,0,10"/><TextBox x:Name="CoverageText" Style="{StaticResource Selectable}"/></StackPanel></ScrollViewer></TabItem>
+     <TabItem x:Name="NextTab" Header="Next steps"><ScrollViewer MaxHeight="390" VerticalScrollBarVisibility="Auto"><TextBox x:Name="NextText" Style="{StaticResource Selectable}" Margin="0,6"/></ScrollViewer></TabItem>
+    </TabControl>
+    <WrapPanel Margin="0,18,0,0"><Button Content="Save readable report" Click="SaveText_Click" FontSize="12"/><Button Content="Save original JSON" Click="SaveJson_Click" FontSize="12"/></WrapPanel>
+    <TextBlock Text="Reports may contain usernames, profile names, local paths and browsing details. Original JSON retains raw indicator addresses; share it securely and do not open those addresses." FontSize="11" Foreground="#74829A" Margin="0,12,0,0"/>
+   </StackPanel></Border>
+   <TextBlock Text="No match does not prove the device is free of spyware." FontSize="11" Foreground="#74829A" Margin="2,20,2,0"/>
+   <WrapPanel Margin="0,8,0,0"><Button Content="Diagnostic details" Click="Diagnostics_Click" FontSize="11" Padding="0,8" Background="Transparent" Foreground="#6A7890" Margin="0,0,22,0"/><Button Content="About &amp; notices" Click="About_Click" FontSize="11" Padding="0,8" Background="Transparent" Foreground="#6A7890" Margin="0"/></WrapPanel>
+  </StackPanel></ScrollViewer>
+ </Grid>
+</Window>
