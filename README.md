@@ -4,7 +4,7 @@ An independent English desktop interface for [interplains/zero-breach](https://g
 
 ## Use
 
-Download **ZeroBreach.exe** and place it in a writable local folder. Open it, close your browsers if possible, choose a standard or quick scan, and select **Start scan**. Python, .NET and administrator access are not required.
+Download **[ZeroBreach.exe](https://github.com/michal78/zero-breach-gui/releases/latest/download/ZeroBreach.exe)** from the latest release and place it in a writable local folder. Open it, close your browsers if possible, choose a standard or quick scan, and select **Start scan**. Python, .NET and administrator access are not required.
 
 The application checks GitHub for the latest stable official scanner, verifies the publisher's detached signatures and signed SHA-256 manifest, then scans the current Windows account. Progress shows real stages rather than an estimated percentage. You can cancel a scan.
 
@@ -51,7 +51,15 @@ dotnet run --project tools/ZeroBreach.Smoke -- .tools/smoke/ZeroBreach-data
 dotnet run --project tools/ZeroBreach.Smoke -- .tools/smoke/ZeroBreach-data --full
 ```
 
-The GUI executable is initially unsigned. Publisher signature verification applies to the downloaded scanner, not the GUI. A trusted signing certificate can be added to the release process separately. Keep the project repository private until its owner authorises public release.
+The GUI executable is initially unsigned. Publisher signature verification applies to the downloaded scanner, not the GUI. A trusted signing certificate can be added to the release process separately.
+
+## Automated builds and releases
+
+The GitHub Action **Windows build and release** builds and tests pull requests to `main`. Every push to `main`, including a merged pull request, builds and tests on Windows, then publishes a release containing **ZeroBreach.exe** and **SHA256SUMS.txt**. A failed build or test prevents publication. The repository is public, so published releases are public too.
+
+Versions use the project's major/minor version and its base patch plus the workflow run number (for example `v0.1.3`). Pull-request runs may leave gaps between published version numbers. Rerunning a workflow keeps its version and never replaces a published executable with different bytes. Release tags point to the exact tested commit. A draft is used while uploading, then published after all files are present.
+
+The workflow uses GitHub's built-in token; no personal access token is needed. Only the release job has repository write permission. The **Run workflow** button performs a build with a downloadable artifact without creating a release.
 
 ## Trust and attribution
 

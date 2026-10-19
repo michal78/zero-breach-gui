@@ -128,7 +128,7 @@ public partial class MainWindow : Window
         using var input = typeof(ScanRunner).Assembly.GetManifestResourceStream(name) ?? throw new InvalidDataException("An embedded application component is missing.");
         using var output = new MemoryStream(); input.CopyTo(output); return output.ToArray();
     }
-    private void About_Click(object sender,RoutedEventArgs e) => ShowDetails("About Zero Breach", "Zero Breach Windows GUI 0.1.0\n\nIndependent interface for interplains/zero-breach. Not endorsed by the upstream project or cited researchers.\n\nOfficial scanner: https://github.com/interplains/zero-breach\nTrusted publisher fingerprint: " + SignatureVerifier.Fingerprint + "\n\n" + Encoding.UTF8.GetString(Resource("notices.txt")));
+    private void About_Click(object sender,RoutedEventArgs e) => ShowDetails("About Zero Breach", "Zero Breach Windows GUI " + Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion + "\n\nIndependent interface for interplains/zero-breach. Not endorsed by the upstream project or cited researchers.\n\nOfficial scanner: https://github.com/interplains/zero-breach\nTrusted publisher fingerprint: " + SignatureVerifier.Fingerprint + "\n\n" + Encoding.UTF8.GetString(Resource("notices.txt")));
     private void Source_RequestNavigate(object sender,System.Windows.Navigation.RequestNavigateEventArgs e)
     {
         e.Handled = true;

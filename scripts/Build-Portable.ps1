@@ -1,4 +1,8 @@
-param([string]$DotNet = 'dotnet')
+param(
+    [string]$DotNet = 'dotnet',
+    [ValidatePattern('^\d+\.\d+\.\d+$')][string]$Version,
+    [string]$OutputDirectory = 'artifacts'
+)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 Push-Location $projectRoot
@@ -19,11 +23,14 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
     & $DotNet test tests/ZeroBreach.Tests -c Release --no-restore --nologo --verbosity minimal
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
-    & $DotNet publish src/ZeroBreach.App -c Release --no-restore -o artifacts --nologo --verbosity minimal
+    $publishArgs = @('publish','src/ZeroBreach.App','-c','Release','--no-restore','-o',$OutputDirectory,'--nologo','--verbosity','minimal')
+    if ($Version) { $publishArgs += "-p:Version=$Version" }
+    & $DotNet @publishArgs
     if ($LASTEXITCODE -ne 0) { throw 'Portable publish failed.' }
-    $exe = Join-Path $projectRoot 'artifacts/ZeroBreach.exe'
+    $outputRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot $OutputDirectory))
+    $exe = Join-Path $outputRoot 'ZeroBreach.exe'
     if (-not (Test-Path -LiteralPath $exe)) { throw 'Expected single-file executable was not produced.' }
-    $files = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'artifacts') -File
+    $files = Get-ChildItem -LiteralPath $outputRoot -File
     if ($files.Count -ne 1 -or $files[0].Name -ne 'ZeroBreach.exe') { throw 'Unexpected companion files in artifacts; inspect the output before distribution.' }
     Get-Item -LiteralPath $exe | Select-Object FullName,Length
     Get-FileHash -LiteralPath $exe -Algorithm SHA256
