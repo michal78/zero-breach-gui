@@ -73,7 +73,7 @@ public partial class MainWindow : Window
             report = result; diagnostics = runner.Diagnostics; ShowReport(result);
             StatusText.Text = $"Scan completed with verified scanner {scanner.Tag}. Review the result and coverage gaps below.";
         }
-        catch (OperationCanceledException) { workflow.Cancel(); StatusText.Text = "Scan cancelled. No completed result is available."; }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { workflow.Cancel(); StatusText.Text = "Scan cancelled. No completed result is available."; }
         catch (Exception ex) {
             var wasUpdating = workflow.State == ScanState.Updating; workflow.Fail();
             diagnostics = (runner?.Diagnostics ?? "") + "\n" + ex;

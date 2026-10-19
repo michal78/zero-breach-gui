@@ -29,4 +29,9 @@ public class RuntimeTests
         try { using var first = PortableWorkspace.Acquire(root); Assert.Throws<IOException>(() => PortableWorkspace.Acquire(root)); }
         finally { Directory.Delete(root,true); }
     }
+    [Fact] public void WorkspaceCreationFailureExplainsHowToProceed() {
+        var path=Path.Combine(Path.GetTempPath(),Guid.NewGuid().ToString()); File.WriteAllText(path,"obstruction");
+        try { var ex=Assert.Throws<IOException>(()=>PortableWorkspace.Acquire(path)); Assert.Contains("writable local folder",ex.Message); }
+        finally { File.Delete(path); }
+    }
 }

@@ -7,6 +7,13 @@ using ZeroBreach.Core.Updates;
 namespace ZeroBreach.Tests;
 public class ReleaseClientTests
 {
+    private sealed class BlockedStream : Stream {
+        public override bool CanRead=>true; public override bool CanSeek=>false; public override bool CanWrite=>false;
+        public override long Length=>throw new NotSupportedException(); public override long Position {get=>throw new NotSupportedException();set=>throw new NotSupportedException();}
+        public override int Read(byte[] b,int o,int c)=>throw new NotSupportedException();
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer,CancellationToken token=default) { await Task.Delay(Timeout.Infinite,token); return 0; }
+        public override void Flush()=>throw new NotSupportedException(); public override long Seek(long o,SeekOrigin s)=>throw new NotSupportedException(); public override void SetLength(long v)=>throw new NotSupportedException(); public override void Write(byte[] b,int o,int c)=>throw new NotSupportedException();
+    }
     private sealed class Handler(Func<HttpRequestMessage,CancellationToken,Task<HttpResponseMessage>> send) : HttpMessageHandler {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token) => send(request,token);
     }
@@ -55,5 +62,14 @@ public class ReleaseClientTests
         using var client = new ReleaseClient(new Handler((_,_)=>{ requests++; return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Redirect) { Headers = { Location = new Uri("https://github.com/again") } }); }));
         await Assert.ThrowsAsync<InvalidDataException>(()=>client.DownloadAsync(new Uri("https://github.com/file"),100,CancellationToken.None));
         Assert.InRange(requests,1,6);
+    }
+    [Fact] public async Task BodyStallHasDeadlineAfterHeadersArrive() {
+        using var client = new ReleaseClient(new Handler((_,_)=>Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) {Content=new StreamContent(new BlockedStream())})),TimeSpan.FromMilliseconds(100));
+        using var safety = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+        await Assert.ThrowsAsync<TimeoutException>(()=>client.DownloadAsync(new Uri("https://github.com/file"),100,safety.Token));
+    }
+    [Fact] public async Task NetworkTimeoutIsFailureRatherThanUserCancellation() {
+        using var client = new ReleaseClient(new Handler(async (_,token)=>{await Task.Delay(10000,token);return Json("");}),TimeSpan.FromMilliseconds(100));
+        await Assert.ThrowsAsync<TimeoutException>(()=>client.DownloadAsync(new Uri("https://github.com/file"),100,CancellationToken.None));
     }
 }

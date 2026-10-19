@@ -4,6 +4,12 @@ using ZeroBreach.Core.Scanning;
 using ZeroBreach.Core.Updates;
 
 // Explicit, opt-in online integration check. No raw personal reports are printed or retained.
+if (args.Length == 3 && args[0] == "--parse-report") {
+    var fixture = ReportReader.Parse(await File.ReadAllTextAsync(args[1]),int.Parse(args[2]));
+    if (!ReportExporter.ToText(fixture).Contains("WHAT COULD NOT BE CHECKED")) throw new Exception("Export failed.");
+    Console.WriteLine($"PASS: upstream report parsed and exported; findings={fixture.Findings.Count}; gaps={fixture.Gaps.Count}.");
+    return;
+}
 var root = Path.GetFullPath(args.Length > 0 ? args[0] : ".tools/smoke/ZeroBreach-data");
 var quick = !args.Contains("--full");
 using var workspace = PortableWorkspace.Acquire(root);

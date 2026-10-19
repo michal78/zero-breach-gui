@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup><TargetFramework>net10.0-windows</TargetFramework><OutputType>WinExe</OutputType><UseWPF>true</UseWPF><SelfContained>true</SelfContained><RuntimeIdentifier>win-x64</RuntimeIdentifier></PropertyGroup>
+ <ItemGroup><ProjectReference Include="../../src/ZeroBreach.App/ZeroBreach.App.csproj" /><None Include="../../tests/ZeroBreach.Tests/Fixtures/sample-report.json" Link="sample-report.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+</Project>

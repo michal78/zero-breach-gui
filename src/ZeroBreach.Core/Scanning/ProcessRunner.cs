@@ -4,13 +4,14 @@ namespace ZeroBreach.Core.Scanning;
 public record ProcessResult(int ExitCode,string Output,string Error);
 public static class ProcessRunner
 {
-    public static async Task<ProcessResult> RunAsync(string executable, IReadOnlyList<string> args, string cwd, IProgress<string> progress, CancellationToken token)
+    public static async Task<ProcessResult> RunAsync(string executable, IReadOnlyList<string> args, string cwd, IProgress<string> progress, CancellationToken token, IReadOnlyDictionary<string,string>? environment = null)
     {
         token.ThrowIfCancellationRequested();
         var start = new ProcessStartInfo(executable) { UseShellExecute = false, CreateNoWindow = true, WorkingDirectory = cwd,
             RedirectStandardOutput = true, RedirectStandardError = true, StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8 };
         foreach (var arg in args) start.ArgumentList.Add(arg);
         start.Environment.Remove("PYTHONPATH"); start.Environment.Remove("PYTHONHOME");
+        if (environment != null) foreach (var pair in environment) start.Environment[pair.Key] = pair.Value;
         using var process = new Process { StartInfo = start };
         if (!process.Start()) throw new IOException("The local scanner process could not be started.");
         using var registration = token.Register(() => { try { if (!process.HasExited) process.Kill(true); } catch (InvalidOperationException) { } });

@@ -24,6 +24,10 @@ public class ReportTests
         Assert.Contains("does not prove", r.Summary);
         Assert.Empty(r.Findings);
     }
+    [Fact] public void OfficialSingleFileVersionLabelIsAcceptedAndNormalised() {
+        var json=Fixture().Replace("\"version\":\"0.1.4\"","\"version\":\"0.1.4 (single-file build)\"");
+        Assert.Equal("0.1.4",ReportReader.Parse(json,0).Version);
+    }
     [Theory]
     [InlineData("referenced", "campaign", "Saved reference")]
     [InlineData("on-disk", "vuln-driver", "Legitimate driver")]
@@ -50,5 +54,11 @@ public class ReportTests
         Assert.Throws<InvalidDataException>(() => ReportReader.Parse(Fixture("on-disk"), 0));
         var n = JsonNode.Parse(Fixture())!; n["verdict"]!["hits_total"] = 3;
         Assert.Throws<InvalidDataException>(() => ReportReader.Parse(n.ToJsonString(), 2));
+    }
+    [Fact] public void EvidenceStartingInside2024OnlyCoversPartOfCampaign() {
+        var n = JsonNode.Parse(Fixture())!;
+        n["modules"]!["browser"]!["reach"] = JsonNode.Parse("{\"cache\":{\"earliest\":\"2024-08-01\",\"basis\":\"surviving timestamps\"}}");
+        var r = ReportReader.Parse(n.ToJsonString(),0);
+        Assert.Contains(r.Coverage,x=>x.Contains("only part of"));
     }
 }

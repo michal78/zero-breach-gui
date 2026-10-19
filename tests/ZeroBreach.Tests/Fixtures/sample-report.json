@@ -1,0 +1,16 @@
+{
+ "tool":{"name":"adint-scan","version":"0.1.4"},
+ "timestamp":"2026-10-19T12:00:00",
+ "platform":{"system":"Windows","release":"11"},
+ "ioc_set":{"count":405,"stale":false},
+ "modules":{
+  "browser":{
+   "name":"browser","status":"HITS","checked":1200,"skipped":1,
+   "hits":[{"indicator":"synthetic.example","location":"C:\\Synthetic test\\Browser\\Cache","detail":"Synthetic saved reference: https://synthetic.example/article","tier":"delivery","confidence":"high","source":"Synthetic demonstration; not a live detection","evidence":"referenced","observed":"2025-02-01","profile":"Test profile"}],
+   "checks":[{"name":"history","ran":true,"reason":""},{"name":"cookies","ran":false,"reason":"Synthetic locked database"}],
+   "notes":["Synthetic fixture for interface checks; no personal browsing records."],"submetrics":{},
+   "reach":{"history":{"earliest":"2024-08-01","basis":"Synthetic record timestamps","note":"Only surviving records can be examined."}}
+  }
+ },
+ "verdict":{"status":"INDICATORS_FOUND","hits_total":1,"gaps":["browser/cookies: Synthetic locked database"]}
+}

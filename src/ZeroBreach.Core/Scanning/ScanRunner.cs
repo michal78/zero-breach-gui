@@ -20,7 +20,9 @@ public sealed class ScanRunner(string python, string root, VerifiedCache cache)
             var args = new List<string> { "-I", "-S", "-B", "-u", "-X", "utf8", script, "--json", report };
             if (quick) args.Add("--quick");
             progress.Report("Scanning this Windows account…");
-            var result = await ProcessRunner.RunAsync(python,args,folder,progress,token);
+            // TMPDIR confines upstream database snapshots to this run without changing
+            // TEMP/TMP, which are also part of the scanner's file-fingerprint search.
+            var result = await ProcessRunner.RunAsync(python,args,folder,progress,token,new Dictionary<string,string> { ["TMPDIR"] = folder });
             Diagnostics = result.Output + "\n" + result.Error;
             if (result.ExitCode is not (0 or 2)) throw new InvalidDataException("The scanner could not complete this run. Review diagnostic details or try again.");
             if (!File.Exists(report) || new FileInfo(report).Length > 32*1024*1024) throw new InvalidDataException("The scanner did not produce a valid report. No completed result can be shown.");

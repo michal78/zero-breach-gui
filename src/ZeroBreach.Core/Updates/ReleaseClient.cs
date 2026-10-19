@@ -7,11 +7,13 @@ public record ReleaseDescriptor(string Tag, IReadOnlyDictionary<string, Uri> Ass
 public sealed class ReleaseClient : IDisposable
 {
     private readonly HttpClient http;
+    private readonly TimeSpan downloadTimeout;
     public static readonly string[] RequiredAssets = ["zero-breach.py", "zero-breach.py.asc", "SHA256SUMS.txt", "SHA256SUMS.txt.asc"];
     public ReleaseClient() : this(new HttpClientHandler { AllowAutoRedirect = false }) { }
-    public ReleaseClient(HttpMessageHandler handler)
+    public ReleaseClient(HttpMessageHandler handler,TimeSpan? timeout = null)
     {
-        http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(60) };
+        downloadTimeout = timeout ?? TimeSpan.FromSeconds(60);
+        http = new HttpClient(handler) { Timeout = Timeout.InfiniteTimeSpan };
         http.DefaultRequestHeaders.UserAgent.ParseAdd("ZeroBreach-Windows-GUI/0.1");
         http.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
     }
@@ -21,6 +23,14 @@ public sealed class ReleaseClient : IDisposable
             throw new InvalidDataException("The update refers to an unexpected download location.");
     }
     public async Task<byte[]> DownloadAsync(Uri url, int limit, CancellationToken token)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
+        deadline.CancelAfter(downloadTimeout);
+        try { return await DownloadCoreAsync(url,limit,deadline.Token); }
+        catch (OperationCanceledException ex) when (!token.IsCancellationRequested && deadline.IsCancellationRequested)
+        { throw new TimeoutException("The official release download timed out. Check your connection and retry, or explicitly choose a verified saved version if available.",ex); }
+    }
+    private async Task<byte[]> DownloadCoreAsync(Uri url, int limit, CancellationToken token)
     {
         for (int redirect = 0; redirect <= 5; redirect++) {
             ValidateUrl(url);

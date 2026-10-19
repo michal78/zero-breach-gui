@@ -31,6 +31,8 @@ public static class ReportReader
         var root = doc.RootElement;
         Require(S(root.GetProperty("tool"), "name") == "adint-scan");
         var version = S(root.GetProperty("tool"), "version");
+        const string buildSuffix = " (single-file build)";
+        if (version.EndsWith(buildSuffix,StringComparison.Ordinal)) version = version[..^buildSuffix.Length];
         Require(Version.TryParse(version, out var v) && v.Major == 0 && v.Minor == 1);
         var timestamp = S(root, "timestamp");
         Require(DateTime.TryParse(timestamp, System.Globalization.CultureInfo.InvariantCulture, out _));
@@ -60,7 +62,7 @@ public static class ReportReader
                 foreach (var r in reach.EnumerateObject())
                 {
                     var earliest = O(r.Value,"earliest");
-                    var period = DateTime.TryParse(earliest,out var first) ? first.Year > 2025 ? "This record does not reach the documented 2024–2025 campaign period." : first.Year > 2024 ? "This record reaches only part of the documented 2024–2025 campaign period." : "The earliest record predates the documented 2024–2025 campaign period. This does not establish complete coverage." : "No surviving evidence window was established for this record.";
+                    var period = DateTime.TryParse(earliest,System.Globalization.CultureInfo.InvariantCulture,out var first) ? first.Date > new DateTime(2025,12,31) ? "This record does not reach the documented 2024–2025 campaign period." : first.Date > new DateTime(2024,1,1) ? "This record reaches only part of the documented 2024–2025 campaign period." : "The earliest record begins at or before the documented 2024–2025 campaign period. This does not establish complete coverage." : "No surviving evidence window was established for this record.";
                     coverage.Add($"{module.Name}/{r.Name}: earliest surviving evidence: {(earliest.Length == 0 ? "none recorded" : earliest)}\n{O(r.Value,"basis")}\n{O(r.Value,"note")}\n{period}");
                 }
             foreach (var h in hits)

@@ -16,4 +16,9 @@ public class ProcessTests
         var r = await ProcessRunner.RunAsync("powershell.exe",["-NoProfile","-Command","1..20000 | ForEach-Object { 'diagnostic line' }"],Path.GetTempPath(),new Progress<string>(),CancellationToken.None);
         Assert.True(r.Output.Length <= 65536); Assert.Equal(0,r.ExitCode);
     }
+    [Fact] public async Task ScannerTemporaryDirectoryIsIsolatedWithoutChangingHashSearchRoots() {
+        var r = await ProcessRunner.RunAsync("powershell.exe",["-NoProfile","-Command","Write-Output $env:TMPDIR; Write-Output $env:TEMP"],Path.GetTempPath(),new Progress<string>(),CancellationToken.None,new Dictionary<string,string>{{"TMPDIR","C:\\Test run"}});
+        Assert.Contains("C:\\Test run",r.Output);
+        Assert.Contains(Environment.GetEnvironmentVariable("TEMP")!,r.Output);
+    }
 }
