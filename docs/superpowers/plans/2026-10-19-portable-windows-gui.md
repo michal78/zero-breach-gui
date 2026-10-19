@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-19-portable-windows-gui-design.md`
 
+**Delivery status:** All five implementation components are delivered on `feature/portable-gui`, with 47 passing automated tests and completed quick/full service integration checks. `artifacts/ZeroBreach.exe` is the single-file deliverable. See `docs/verification.md` for evidence, decisions, and the specific platform/UI-validation limits; the detailed checklist below is retained as the original execution brief.
+
 ## Global Constraints
 
 - All application labels, status messages, errors, explanations, and generated report headings must be English.

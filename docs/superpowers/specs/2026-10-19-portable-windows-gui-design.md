@@ -1,7 +1,7 @@
 # Zero Breach Portable Windows GUI
 
 Date: 2026-10-19
-Status: Original specification approved; distribution and repository requirements amended by the user
+Status: Approved and implemented, including the user's single-executable distribution and private repository requirements. Validation limits are recorded in docs/verification.md.
 
 ## Purpose
 
