@@ -12,3 +12,5 @@ ZeroBreach-data/
 .superpowers/
 assets/runtime/*.zip
 assets/runtime/*.sigstore
+__pycache__/
+*.pyc

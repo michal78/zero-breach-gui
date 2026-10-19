@@ -52,6 +52,10 @@ jobs:
           BUILD_VERSION: ${{ steps.version.outputs.version }}
         run: ./scripts/Build-Portable.ps1 -Version $env:BUILD_VERSION
 
+      - name: Test release handling without publishing
+        shell: pwsh
+        run: python -m unittest discover -s tests/workflows -v
+
       - name: Write executable checksum
         shell: pwsh
         run: |
@@ -75,6 +79,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    concurrency:
+      group: publish-main-releases
+      queue: max
     permissions:
       actions: read
       contents: write
@@ -97,6 +104,19 @@ jobs:
           cd artifacts
           sha256sum --check SHA256SUMS.txt
           tag="v${RELEASE_VERSION}"
+          verify_existing_tag() {
+            local actual_sha
+            if actual_sha="$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha 2>tag-error.txt)"; then
+              if [[ "$actual_sha" != "$SOURCE_SHA" ]]; then
+                echo "Release tag already belongs to another commit; refusing to publish."
+                return 1
+              fi
+            elif ! grep -q '(HTTP 404)' tag-error.txt; then
+              cat tag-error.txt >&2
+              return 1
+            fi
+          }
+          verify_existing_tag
           if gh release view "$tag" --json isDraft,targetCommitish > release-state.json 2>/dev/null; then
             is_draft="$(jq -r .isDraft release-state.json)"
             if [[ "$is_draft" == "true" ]]; then
@@ -122,6 +142,7 @@ jobs:
               --target "$SOURCE_SHA" --title "Zero Breach $RELEASE_VERSION" \
               --generate-notes --draft
           fi
+          verify_existing_tag
           latest=true
           current_tag="$(gh api "repos/$GH_REPO/releases/latest" --jq .tag_name 2>/dev/null || true)"
           if [[ -n "$current_tag" && "$(printf '%s\n%s\n' "$current_tag" "$tag" | sort -V | tail -n 1)" != "$tag" ]]; then

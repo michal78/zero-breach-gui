@@ -57,9 +57,17 @@ The GUI executable is initially unsigned. Publisher signature verification appli
 
 The GitHub Action **Windows build and release** builds and tests pull requests to `main`. Every push to `main`, including a merged pull request, builds and tests on Windows, then publishes a release containing **ZeroBreach.exe** and **SHA256SUMS.txt**. A failed build or test prevents publication. The repository is public, so published releases are public too.
 
-Versions use the project's major/minor version and its base patch plus the workflow run number (for example `v0.1.3`). Pull-request runs may leave gaps between published version numbers. Rerunning a workflow keeps its version and never replaces a published executable with different bytes. Release tags point to the exact tested commit. A draft is used while uploading, then published after all files are present.
+Versions use the project's major/minor version and its base patch plus the workflow run number (for example `v0.1.3`). Pull-request runs may leave gaps between published version numbers. Rerunning a workflow keeps its version and never replaces a published executable with different bytes. Release tags point to the exact tested commit. A draft is used while uploading, then published after all files are present. Publication is queued one release at a time, so overlapping builds cannot move the latest download backwards.
 
 The workflow uses GitHub's built-in token; no personal access token is needed. Only the release job has repository write permission. The **Run workflow** button performs a build with a downloadable artifact without creating a release.
+
+Offline release regression tests execute the actual publication script with a simulated GitHub CLI, without creating tags or releases:
+
+```powershell
+python -m unittest discover -s tests/workflows -v
+```
+
+These development tests require Python and Bash (Git for Windows provides Bash); neither is an extra end-user requirement.
 
 ## Trust and attribution
 

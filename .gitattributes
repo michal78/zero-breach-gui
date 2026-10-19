@@ -1,0 +1,8 @@
+* text=auto
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.asc text eol=lf
+
+# Detached signatures authenticate exact bytes; never convert this fixture.
+tests/ZeroBreach.Tests/Fixtures/SHA256SUMS.txt -text

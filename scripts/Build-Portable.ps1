@@ -27,7 +27,7 @@ try {
     if ($Version) { $publishArgs += "-p:Version=$Version" }
     & $DotNet @publishArgs
     if ($LASTEXITCODE -ne 0) { throw 'Portable publish failed.' }
-    $outputRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot $OutputDirectory))
+    $outputRoot = if ([IO.Path]::IsPathRooted($OutputDirectory)) { [IO.Path]::GetFullPath($OutputDirectory) } else { [IO.Path]::GetFullPath((Join-Path $projectRoot $OutputDirectory)) }
     $exe = Join-Path $outputRoot 'ZeroBreach.exe'
     if (-not (Test-Path -LiteralPath $exe)) { throw 'Expected single-file executable was not produced.' }
     $files = Get-ChildItem -LiteralPath $outputRoot -File
