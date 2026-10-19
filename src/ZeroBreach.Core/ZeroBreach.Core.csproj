@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.6.2" />
+    <EmbeddedResource Include="../../assets/trust/publisher.asc" LogicalName="publisher.asc" />
+    <EmbeddedResource Include="../../assets/runtime/python.zip" LogicalName="python.zip" />
+    <EmbeddedResource Include="../../THIRD-PARTY-NOTICES.md" LogicalName="notices.txt" />
+  </ItemGroup>
+</Project>

@@ -8,3 +8,7 @@ ZeroBreach-data/
 **/ZeroBreach-data/
 *.user
 *.suo
+
+.superpowers/
+assets/runtime/*.zip
+assets/runtime/*.sigstore
