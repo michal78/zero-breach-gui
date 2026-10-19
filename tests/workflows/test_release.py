@@ -19,12 +19,19 @@ set -eu
 echo "$*" >> "$CALLS"
 case "$1 $2" in
   'api repos/'*)
-    if [[ "$2" == */commits/* ]]; then
+    if [[ "$2" == */git/ref/tags/* ]]; then
       case "$CASE" in
         collision|draft_collision) printf '%040d\n' 2 ;;
         published|changed) printf '%040d\n' 1 ;;
         api_failure) echo 'gh: Forbidden (HTTP 403)' >&2; exit 1 ;;
         *) echo 'gh: Not Found (HTTP 404)' >&2; exit 1 ;;
+      esac
+    elif [[ "$2" == */commits/* ]]; then
+      case "$CASE" in
+        collision|draft_collision) printf '%040d\n' 2 ;;
+        published|changed) printf '%040d\n' 1 ;;
+        api_failure) echo 'gh: Forbidden (HTTP 403)' >&2; exit 1 ;;
+        *) echo 'gh: No commit found for SHA: v0.1.3 (HTTP 422)' >&2; exit 1 ;;
       esac
     elif [[ "$2" == */releases/latest ]]; then
       if [[ "$CASE" == newer ]]; then echo v0.1.9; else echo 'gh: Not Found (HTTP 404)' >&2; exit 1; fi
