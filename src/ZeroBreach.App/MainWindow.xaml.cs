@@ -32,8 +32,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent(); cache = new VerifiedCache(Path.Combine(root,"scanners"));
         var area = SystemParameters.WorkArea;
-        Width = Math.Min(1120,area.Width * 0.95); Height = Math.Min(840,area.Height * 0.95);
-        MinWidth = Math.Min(860,Width); MinHeight = Math.Min(650,Height);
+        Width = Math.Min(900,area.Width * 0.95); Height = Math.Min(760,area.Height * 0.95);
+        MinWidth = Math.Min(760,Width); MinHeight = Math.Min(650,Height);
         timer.Tick += (_,_) => ElapsedText.Text = $"Elapsed {clock.Elapsed:mm\\:ss} · {workflow.State}";
         Loaded += (_,_) => {
             try {
@@ -129,6 +129,13 @@ public partial class MainWindow : Window
         using var output = new MemoryStream(); input.CopyTo(output); return output.ToArray();
     }
     private void About_Click(object sender,RoutedEventArgs e) => ShowDetails("About Zero Breach", "Zero Breach Windows GUI 0.1.0\n\nIndependent interface for interplains/zero-breach. Not endorsed by the upstream project or cited researchers.\n\nOfficial scanner: https://github.com/interplains/zero-breach\nTrusted publisher fingerprint: " + SignatureVerifier.Fingerprint + "\n\n" + Encoding.UTF8.GetString(Resource("notices.txt")));
+    private void Source_RequestNavigate(object sender,System.Windows.Navigation.RequestNavigateEventArgs e)
+    {
+        e.Handled = true;
+        try { Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true }); }
+        catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
+        { ShowError("Could not open the browser. Python source: https://github.com/interplains/zero-breach/tree/main/scan"); }
+    }
     private void Diagnostics_Click(object sender,RoutedEventArgs e) => ShowDetails("Diagnostic details", "Diagnostics may contain local paths or profile information. Share securely.\n\n" + diagnostics);
     private void ShowDetails(string title,string text)
     {
