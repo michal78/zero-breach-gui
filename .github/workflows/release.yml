@@ -106,7 +106,8 @@ jobs:
           tag="v${RELEASE_VERSION}"
           verify_existing_tag() {
             local actual_sha
-            if actual_sha="$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha 2>tag-error.txt)"; then
+            if gh api "repos/$GH_REPO/git/ref/tags/$tag" --silent 2>tag-error.txt; then
+              actual_sha="$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha)"
               if [[ "$actual_sha" != "$SOURCE_SHA" ]]; then
                 echo "Release tag already belongs to another commit; refusing to publish."
                 return 1
